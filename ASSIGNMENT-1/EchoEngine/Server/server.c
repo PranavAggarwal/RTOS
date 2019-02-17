@@ -53,20 +53,32 @@ int main()
     printf("Server started\n");
 
     while(1) { 
-        // Message Type = 1: Client Sending message to server 
-        // Message Type = 2: Server Sending message to client
+        // Message Type = 1: ClientA Sending message to server
+        // Message Type = 2: ClientB Sending message to server
+        // Message Type = 3: ClientC Sending message to server
+        // Message Type = 4: ClientD Sending message to server
+        // Message Type = 1: ClientE Sending message to server 
+        // Message Type = 6: Server Sending message to clientA
+        // Message Type = 7: Server Sending message to clientB
+        // Message Type = 8: Server Sending message to clientC
+        // Message Type = 9: Server Sending message to clientD
+        // Message Type = 10: Server Sending message to clientE
         
         // Receiving messages from the client
-        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 1, 0) == -1) 
+        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 0, 0) == -1) 
         {
             perror("msgrcv");
             exit(1);
         }
-        printf("Received: \"%c\"\n", buf.msg_text);
-
+        // Print message if received from client
+        if(buf.msg_type == 1 || buf.msg_type == 2 || buf.msg_type == 3 || buf.msg_type == 4 || buf.msg_type == 5){
+            printf("Received: \"%c\"\n", buf.msg_text);
+        }
+        
         // Changing the charecter as required
         buf.msg_text = server_func(buf.msg_text);
-        buf.msg_type = 2;
+        // Depending on the client, defining msg_type          
+        buf.msg_type += 5;
         
         // If charecter in newline, changing it to NULL
         if (buf.msg_text == '\n') buf.msg_text = '\0';

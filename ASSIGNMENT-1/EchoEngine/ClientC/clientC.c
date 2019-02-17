@@ -45,9 +45,9 @@ int main()
 
     printf("Charecter to send: ");
     while(1) {
-        // Message Type = 1: Client Sending message to server 
-        // Message Type = 2: Server Sending message to client
-        buf.msg_type = 1; 
+        // Message Type = 3: Client Sending message to server 
+        // Message Type = 8: Server Sending message to client
+        buf.msg_type = 3; 
         
         // Scanning the character to be sent
         scanf("%c", &buf.msg_text);
@@ -60,7 +60,7 @@ int main()
             start = get_cycles();
         
             // Sending the message
-            if (msgsnd(msgid, &buf, 1, 0) == -1) 
+            if (msgsnd(msgid, &buf, 8, 0) == -1) 
                 perror("msgsnd");
 
             // Receiving the response from server

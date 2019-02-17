@@ -45,7 +45,7 @@ int main()
 
     while(1) {
         // Message Type = 1: Client Sending message to server 
-        // Message Type = 2: Server Sending message to client
+        // Message Type = 6: Server Sending message to client
         buf.msg_type = 1; 
         
         printf("File required: ");
@@ -67,7 +67,7 @@ int main()
         }
 
         // Receiving the message
-        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 2, 0) == -1) 
+        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 6, 0) == -1) 
         {
             perror("msgrcv");
             exit(1);

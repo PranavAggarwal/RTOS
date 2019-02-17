@@ -44,9 +44,9 @@ int main()
     printf("Client C started\n");
 
     while(1) {
-        // Message Type = 1: Client Sending message to server 
-        // Message Type = 2: Server Sending message to client
-        buf.msg_type = 1; 
+        // Message Type = 3: Client Sending message to server 
+        // Message Type = 8: Server Sending message to client
+        buf.msg_type = 3; 
         
         printf("File required: ");
         
@@ -67,7 +67,7 @@ int main()
         }
 
         // Receiving the message
-        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 2, 0) == -1) 
+        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 8, 0) == -1) 
         {
             perror("msgrcv");
             exit(1);

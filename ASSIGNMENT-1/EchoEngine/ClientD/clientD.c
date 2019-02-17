@@ -45,9 +45,9 @@ int main()
 
     printf("Charecter to send: ");
     while(1) {
-        // Message Type = 1: Client Sending message to server 
-        // Message Type = 2: Server Sending message to client
-        buf.msg_type = 1; 
+        // Message Type = 4: Client Sending message to server 
+        // Message Type = 9: Server Sending message to client
+        buf.msg_type = 4; 
         
         // Scanning the character to be sent
         scanf("%c", &buf.msg_text);
@@ -64,7 +64,7 @@ int main()
                 perror("msgsnd");
 
             // Receiving the response from server
-            if (msgrcv(msgid, &buf, sizeof buf.msg_text, 2, 0) == -1) 
+            if (msgrcv(msgid, &buf, sizeof buf.msg_text, 9, 0) == -1) 
             {
                 perror("msgrcv");
                 exit(1);

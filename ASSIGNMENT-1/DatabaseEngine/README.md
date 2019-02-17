@@ -6,15 +6,15 @@ First execute the server and than any other client, becuase server is creating t
 
 Number of Clients running | Time (in clock cycles)
 ------------ | -------------
-1 | 5447
-2 | 11640
-3 | 18398
-4 | 27565
-5 | 31231
+1 | 48096
+2 | 58745
+3 | 63684
+4 | 99009
+5 | 126632
 
 #### How was data measured?
 
-1. All programs were running parallely and each program was sending a charecter in an infinite loop.
+1. All programs were running parallely and each program was sending a command in an infinite loop.
 2. One by one each program was stopped to decrease the number of parallel processes.
 3. The recorder clock cycles of the stopped client was observed and the a number was picked in from the range in which most clock cycles appeared.
 

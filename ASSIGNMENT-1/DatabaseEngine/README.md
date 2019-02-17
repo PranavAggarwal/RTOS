@@ -1,8 +1,8 @@
-###How To Run:
+### How To Run:
 
 First execute the server and than any other client, becuase server is creating the message queue
 
-###Performance Data
+### Performance Data
 
 Number of Clients running | Time (in clock cycles)
 ------------ | -------------
@@ -12,7 +12,7 @@ Number of Clients running | Time (in clock cycles)
 4 | 27565
 5 | 31231
 
-####How was data measured?
+#### How was data measured?
 
 1. All programs were running parallely and each program was sending a charecter in an infinite loop.
 2. One by one each program was stopped to decrease the number of parallel processes.

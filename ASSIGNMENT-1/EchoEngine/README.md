@@ -1,6 +1,7 @@
 ### How To Run:
 
 First execute the server and than any other client, becuase server is creating the message queue
+Run msg_del_q.c to delete the message queue.
 
 ### Performance Data
 

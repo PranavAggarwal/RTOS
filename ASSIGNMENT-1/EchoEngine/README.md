@@ -5,13 +5,15 @@
 
 ### Performance Data
 
-Number of Clients running | Time (in clock cycles)
------------- | -------------
-1 | 5447
-2 | 11640
-3 | 18398
-4 | 27565
-5 | 31231
+Number of Clients running | Time (in microseconds) | Time Range (in microseconds)
+------------ | ------------- | -------------
+1 | 8 | 8 - 10
+2 | 11 | 9 - 15
+3 | 13 | 7 - 23
+4 | 12 | 9 - 19
+5 | 16 | 12 - 24
+
+The range mentioned above is the one occuring the most. And the value picked is the one which is occuring nearly the most. But sometimes the value reached in near 100 to 300 microsecond.
 
 #### How was data measured?
 

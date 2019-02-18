@@ -20,7 +20,7 @@ struct msg_buffer server_func(char filename[], int client_no){
 
     // defining a message buffer
     struct msg_buffer buf;
-    buf.msg_type = 5 + client_no;
+    buf.msg_type = 1 + client_no;
     
     // Check for invalid instruction
     char comp[length] = "GET ";
@@ -39,7 +39,7 @@ struct msg_buffer server_func(char filename[], int client_no){
     for(i = 4; i <= len; i++){
         filename[i-4] = filename[i];
     }
-    printf("Filename is: %s\n", filename);
+    // printf("Filename is: %s\n", filename);
 
     // char filenam[length] = "demofile1.txt";
     f = fopen(filename,"r");
@@ -82,53 +82,51 @@ int main()
     printf("Server started\n");
 
     while(1) { 
-        // Message Type = 1: ClientA Sending message to server
-        // Message Type = 2: ClientB Sending message to server
-        // Message Type = 3: ClientC Sending message to server
-        // Message Type = 4: ClientD Sending message to server
-        // Message Type = 1: ClientE Sending message to server 
-        // Message Type = 6: Server Sending message to clientA
-        // Message Type = 7: Server Sending message to clientB
-        // Message Type = 8: Server Sending message to clientC
-        // Message Type = 9: Server Sending message to clientD
-        // Message Type = 10: Server Sending message to clientE
+        // Message Type = 1: Client Sending message to server
+        // Message Type = 2: Server Sending message to clientA
+        // Message Type = 3: Server Sending message to clientB
+        // Message Type = 4: Server Sending message to clientC
+        // Message Type = 5: Server Sending message to clientD
+        // Message Type = 6: Server Sending message to clientE
         
         // Receiving messages from the client
-        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 0, 0) == -1) 
+        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 1, 0) == -1) 
         {
             perror("msgrcv");
             exit(1);
         }
 
-        // Print message if received from client
-        if(buf.msg_type == 1 || buf.msg_type == 2 || buf.msg_type == 3 || buf.msg_type == 4 || buf.msg_type == 5){
-            printf("Received: \"%s\"\n", buf.msg_text);
-        }
+        int len = strlen(buf.msg_text);
+
+        // Getting client number
+        char client_no = buf.msg_text[len - 1];
+        buf.msg_text[len - 1] = '\0';
+        printf("Received: \"%s\"\n", buf.msg_text);
         
         // Depending on the client, message is sent to the same client back          
-        if(buf.msg_type == 1){   
+        if(client_no == '1'){   
             // Reading the file
             buf = server_func(buf.msg_text,1);
         }
-        else if(buf.msg_type == 2){
+        else if(client_no == '2'){
             // Reading the file
             buf = server_func(buf.msg_text,2);    
         }
-        else if(buf.msg_type == 3){
+        else if(client_no == '3'){
             // Reading the file
             buf = server_func(buf.msg_text,3);    
         }
-        else if(buf.msg_type == 4){
+        else if(client_no == '4'){
             // Reading the file
             buf = server_func(buf.msg_text,4);    
         }
-        else if(buf.msg_type == 5){
+        else if(client_no == '5'){
             // Reading the file
             buf = server_func(buf.msg_text,5);    
         }        
         
         // If charecter in newline, changing it to NULL
-        int len = strlen(buf.msg_text);
+        len = strlen(buf.msg_text);
         if (buf.msg_text[len - 1] == '\n') buf.msg_text[len - 1] = '\0';
 
         // Sending the message back to client

@@ -8,13 +8,7 @@
 #include <sys/msg.h> 
 #include <sys/time.h>
 
-// Get clock cycle number
-long long int get_cycles()
-{
-  long long int dst;
-  __asm__ __volatile__ ("rdtsc" : "=A"(dst));
-  return dst;
-}
+#define length 300
 
 // structure for message queue 
 struct msg_buffer { 
@@ -24,11 +18,11 @@ struct msg_buffer {
 
 int main() 
 { 
+    struct timeval start, end;
     struct msg_buffer buf;
     key_t key; 
     int msgid;
-    long long int start, end;
-
+    
     // ftok to generate unique key 
     if((key = ftok("../Server/server", 'B')) == -1){
         perror("ftok");
@@ -45,7 +39,7 @@ int main()
 
     while(1) {
         // Message Type = 1: Client Sending message to server 
-        // Message Type = 6: Server Sending message to client
+        // Message Type = 2: Server Sending message to client
         buf.msg_type = 1; 
         
         printf("File required: ");
@@ -53,12 +47,13 @@ int main()
         // Reading the file name
         if(fgets(buf.msg_text, sizeof buf.msg_text, stdin) != NULL) {
             int len = strlen(buf.msg_text);
-
+            
             // ditch newline at end, if it exists 
             if (buf.msg_text[len-1] == '\n') buf.msg_text[len-1] = '\0';
-
+            strcat(buf.msg_text, "1");
+            
             // Starting the timer
-            start = get_cycles();
+            gettimeofday(&start, NULL);
             
             // Sending the message
             if (msgsnd(msgid, &buf, len+1, 0) == -1)
@@ -67,16 +62,16 @@ int main()
         }
 
         // Receiving the message
-        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 6, 0) == -1) 
+        if (msgrcv(msgid, &buf, sizeof buf.msg_text, 2, 0) == -1) 
         {
             perror("msgrcv");
             exit(1);
         }
 
         // Stoping the clock
-        end = get_cycles();
+        gettimeofday(&end, NULL);
         
-        printf("Received by A: \"%s\"\nTime by A(in clock cycles): %lld\n", buf.msg_text, end - start); 
+        printf("Received by A: \"%s\"\nTime by A(in microsecond): %lu\n", buf.msg_text, end.tv_usec - start.tv_usec);  
     }
     
     return 0; 

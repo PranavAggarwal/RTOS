@@ -8,7 +8,7 @@ Number of Clients running | Time (in microseconds) | Time Range (in microseconds
 ------------ | ------------- | -------------
 1 | 47 | 43 - 69
 2 | 67 | 41 - 89
-3 | 83 | 45 - 656
+3 | 83 | 45 - 353
 4 | 117 | 42 - 349
 5 | 222 | 66 - 476
 

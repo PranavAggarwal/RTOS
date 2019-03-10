@@ -12,7 +12,7 @@ Number of Clients running | Time (in microseconds) | Time Range (in microseconds
 4 | 49 | 39 - 154
 5 | 69 | 76 - 185
 
-The range mentioned above is the one occuring the most. And the value picked is the one which is occuring nearly the most. But sometimes the value reached in near 1500 microsecond.
+The range mentioned above is the one occuring the most. And the value picked is the one which is occuring nearly the most. But sometimes the value reached in near 15000 microsecond.
 
 #### How was data measured?
 

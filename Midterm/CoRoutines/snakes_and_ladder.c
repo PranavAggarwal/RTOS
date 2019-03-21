@@ -6,82 +6,88 @@
 #include<time.h> 
 #include <sys/time.h>
 
-// Global Variables
-#define length 5							// Number of players
-pthread_t tid[length];                		// Thread for each player
+// COROUTINES HELPER FUNCTIONS AND VARIABLES
+
+// Co Routines Variables
+#define length 5											// Number of coroutines
+pthread_t tid[length];                						// Thread for each player
 long int tcnt = 0;
-pthread_mutex_t tlocks[length]; 			// Creating lock for each thread
-pthread_mutex_t lock;						// Main lock for critical section
-char mesg[length] = "\0";					// Message to be sent
+pthread_mutex_t tlocks[length]; 							// Creating lock for each thread
+pthread_mutex_t lock;										// Main lock for critical section
+char mesg[length] = "\0";									// Message to be sent
+
+// Co Routine helper function
 
 // Initializing all mutex
 void cr_init(){
 	int i = 0; 
 	for(i = 0; i < length; i++){
-		pthread_mutex_init(&(tlocks[i]), NULL);
-		pthread_mutex_lock(&(tlocks[i]));
+		pthread_mutex_init(&(tlocks[i]), NULL);				// Initialising all the thread_locks
+		pthread_mutex_lock(&(tlocks[i]));					// Locking all the threads so that game cant be played till all players are created
 	}
-
-	pthread_mutex_lock(&lock);
+	pthread_mutex_init(&lock, NULL);						// Initializing the critical section lock
+	pthread_mutex_lock(&lock);								// Locking the critical section lock
 }
 
 // Create a co-routine by passing function pointer
 int cr_create(void *(*f)(void *)){
-	pthread_create(&(tid[tcnt++]), NULL, f, NULL);
-	pthread_mutex_lock(&lock);
+	pthread_create(&(tid[tcnt++]), NULL, f, NULL);			// Creating each thread
+	pthread_mutex_lock(&lock);								// Critical section so that the game function initializes
 	return tcnt - 1;
 }
 
 // Send data to a co routine and continue execution(handle.send function)
-void cr_send(int cr_id, char * msg){
-	strcpy(mesg, msg);
-	pthread_mutex_unlock(&(tlocks[cr_id]));
-	pthread_mutex_lock(&lock);
+void cr_send(int cr_id){
+	pthread_mutex_unlock(&(tlocks[cr_id]));					// Unlocking the thread so that the player could play the game
+	pthread_mutex_lock(&lock);								// Critical section so that only one player can play at a time
 }
 
 // Breakpoints within functions (Yeild in python)
 void cr_yeild(int cr_id){
-	pthread_mutex_unlock(&lock);
-	pthread_mutex_lock(&(tlocks[cr_id]));
+	pthread_mutex_unlock(&lock);							// Allowing the unlocked player to play the game
+	pthread_mutex_lock(&(tlocks[cr_id]));					// Locking the player so that it could play only once
 }
 
 // Killing a co routine (closing the handle in python)
 void cr_kill(int cr_id){
-	pthread_cancel(tid[cr_id]);
-	pthread_mutex_destroy(&(tlocks[cr_id])); 
+	pthread_cancel(tid[cr_id]);								// Killing the thread
+	pthread_mutex_destroy(&(tlocks[cr_id])); 				// Killing the mutex lock
 }
+
+// SNAKES AND LADDER VARIABLES AND FUNCTION
 
 // Data required for snakes and ladders
 int p_location[length];										// Location of each player
 int snake_start[8] = {17, 54, 62, 64, 87, 92, 95, 98};    	// Start of snake
 int snake_end[8] = {7, 34, 19, 60, 36, 72, 75, 79};     	// End of snake
-int ladder_start[10] = {1, 4, 9, 21, 28, 51, 72, 80};		// Start of ladder
-int ladder_end[10] = {38, 14, 31, 42, 84, 67, 91, 99};		// End of ladder
+int ladder_start[8] = {1, 4, 9, 21, 28, 51, 72, 80};		// Start of ladder
+int ladder_end[8] = {38, 14, 31, 42, 84, 67, 91, 99};		// End of ladder
 int p_win[length];											// Has a player won
 int win[length];                                            // Who came at what position
 int no_win = 0;												// Number of winners
 
 // Rolls the die
 int roll_dice(){
-	
 	return (rand()%6) + 1;
 }
 
 // Checks if player reached any snake or ladder
-int get_index(int v, int * l, int len){
+int isat_snake_or_ladder(int player_pos, int *snake_or_ladder, int len){
 	int i = 0;
 	for(i = 0; i < len; i++){
-		if(l[i] == v) return i;	
+		if(snake_or_ladder[i] == player_pos) {
+			return i;
+		}	
 	}
 	return -1;
 }
 
-// Co ROutine for game
+// Snakes and ladder game
 void* game(void *arg) 
 { 
-	int cr_id = tcnt - 1;
-	p_location[cr_id] = 0;
-	p_win[cr_id] = 0;
+	int cr_id = tcnt - 1;									// Coroutine ID/ Player ID
+	p_location[cr_id] = 0;									// Initializing location of player to 0
+	p_win[cr_id] = 0;										// Initializing player has not yet won
 	
 	while(1){
 		cr_yeild(cr_id);
@@ -94,33 +100,43 @@ void* game(void *arg)
 			p_location[cr_id] += die_roll;
 		}
 
-		while(1){
-			// If did not reachplayer reached snake or ladder
-			if(get_index(p_location[cr_id], snake_start, 10) == -1 && get_index(p_location[cr_id], ladder_start, 10) == -1){
-				printf("\tPlayer at %d\n", p_location[cr_id]);
-				break;
-			}
-			// If reached a snake
-			else if(get_index(p_location[cr_id], snake_start, 10) != -1){
-				int i = get_index(p_location[cr_id], snake_start, 10);
-				p_location[cr_id] = snake_end[i];
-				printf("\tPlayer bit by a snake and is now at %d\n", p_location[cr_id]);
-			}
-			// If reached a ladder
-			else if(get_index(p_location[cr_id], ladder_start, 10) != -1){
-				int i = get_index(p_location[cr_id], ladder_start, 10);
-				p_location[cr_id] = ladder_end[i];	
-				printf("\tPlayer climbed a ladder and is now at %d\n", p_location[cr_id]);
-			}	
+		// If reached a snake
+		if(isat_snake_or_ladder(p_location[cr_id], snake_start, 8) != -1){
+			int i = isat_snake_or_ladder(p_location[cr_id], snake_start, 10);
+			p_location[cr_id] = snake_end[i];
+			printf("\tPlayer bit by a snake\n");
 		}
+		// If reached a ladder
+		if(isat_snake_or_ladder(p_location[cr_id], ladder_start, 8) != -1){
+			int i = isat_snake_or_ladder(p_location[cr_id], ladder_start, 10);
+			p_location[cr_id] = ladder_end[i];	
+			printf("\tPlayer climbed a ladder\n");
+		}	
 		
+		printf("\tPlayer at %d\n", p_location[cr_id]);
 		// Check for win
 		if(p_location[cr_id] == 100){
 			printf("Player %d wins!\n", cr_id);
-			win[no_win] = cr_id;
-			no_win += 1;
-			printf("%d\n", no_win);
-			p_win[cr_id] = 1;
+			win[no_win] = cr_id;							// Storing which player won
+			no_win += 1;									// Incrementing number of winners
+			p_win[cr_id] = 1;								// Making that player state to be won
+			// While loop so that the thread does not keep the lock on
+			while(1){
+				cr_yeild(cr_id);
+			}
+		}
+
+		// If 3 players won finding who came last
+		if(no_win == 3){
+			int i;
+			// Finding the 4th player
+			for(i = 0; i < 4; i++){
+				if (p_win[i] == 0) {
+					win[3] = i;
+				}
+			}
+			p_win[cr_id] = 1;								//Setting player to be won
+			// While loop so that the thread does not keep the lock on
 			while(1){
 				cr_yeild(cr_id);
 			}
@@ -131,52 +147,46 @@ void* game(void *arg)
 	return NULL; 
 } 
 
-// Main function
+// MAIN
 int main(void) 
 { 	
 	srand(time(0));
 	struct timeval stop, start;
 	cr_init();
-	gettimeofday(&start, NULL);
+	gettimeofday(&start, NULL);								// Stating the program
 
 	// Create some co routines 
 	int player1 = cr_create(&game);
 	int player2 = cr_create(&game);
 	int player3 = cr_create(&game);
 	int player4 = cr_create(&game);
-	printf("Before Seg\n");
+	
 	// Play till n-1 player has not won
-	while(p_win[player1] == 0 | p_win[player2] == 0 | p_win[player3] == 0 | p_win[player4] == 0){
-		// if(no_win != length -2){
+	while(p_win[player1] == 0 | p_win[player2] == 0 | p_win[player3] == 0 | p_win[player4] == 0){	
 			if(p_win[player1] == 0){
-				cr_send(player1, "Play");
+				// cr_send(player1, "Play");
+				cr_send(player1);
 			}
 			if(p_win[player2] == 0){
-				cr_send(player2, "Play");
+				// cr_send(player2, "Play");
+				cr_send(player2);
 			}
 			if(p_win[player3] == 0){
-				cr_send(player3, "Play");
+				// cr_send(player3, "Play");
+				cr_send(player3);
 			}
 			if(p_win[player4] == 0){
-				cr_send(player4, "Play");
+				// cr_send(player4, "Play");
+				cr_send(player4);
 			}
-		// }
 	}
-
-	// Finding which player came 4th
-	// int i;
-	// for(i = 0; i < length; i++){
-	// 	if (p_win[i] == 0) {
-	// 		win[3] = i;
-	// 	}
-	// }
 	
 	// Winners
-	printf("WINNERS\n");
-	printf("\t 1st place : player %d\n", win[0]);
-	printf("\t 2nd place : player %d\n", win[1]);
-	printf("\t 3rd place : player %d\n", win[2]);
-	printf("\t 4th place : player %d\n", win[3]);
+	printf("\nWinners are:\n");
+	printf("1st place : player %d\n", win[0]);
+	printf("2nd place : player %d\n", win[1]);
+	printf("3rd place : player %d\n", win[2]);
+	printf("4th place : player %d\n", win[3]);
 
 	// Kill the routines
 	cr_kill(player1);
@@ -184,7 +194,8 @@ int main(void)
 	cr_kill(player3);
 	cr_kill(player4);
 
-	gettimeofday(&stop, NULL);
+	gettimeofday(&stop, NULL);							// End time
+	// Giving time taken by program
 	printf("Total time taken: %lu\n", stop.tv_usec - start.tv_usec);
 		
 	return 0; 

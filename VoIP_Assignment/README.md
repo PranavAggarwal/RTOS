@@ -9,7 +9,7 @@
 * When I just executed the recording code given in PulseAudio documentation, I got some giberish on the STDOUT and nothing was getting saved.
   * To solve this I just stored the data in one file.
 * While sendong data from client, the received voice was not clear and the speed of the voice was very fast, even some parts were getting cut.
-  To solve this I reduced the sampling rate and it worked
+  * To solve this I reduced the sampling rate and it worked
   
 * We could hear some noise in the background throughout the time which I was not able to fix.
 
